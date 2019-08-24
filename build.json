@@ -1,0 +1,35 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "aws_region": ""
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "{{user `aws_region`}}",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "CentOS Linux 7 x86_64 HVM EBS ENA 1901_01*",
+        "root-device-type": "ebs"
+      },
+      "owners": ["679593333241"],
+      "most_recent": true
+    },
+    "instance_type": "t2.micro",
+    "ssh_username": "centos",
+    "ami_name": "centos7 {{timestamp}}",
+    "tags": {
+       "Name": "centos7-{{isotime}}"
+    }
+  }],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "vuls-install.sh"
+      ]
+    }
+  ]
+}
