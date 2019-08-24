@@ -3,19 +3,21 @@ sudo yum -y install sqlite git gcc make wget
 
 # Get latest version number of Golang
 git clone https://github.com/docker-library/golang.git
-cd golang
-LATEST=$(find . -type f -name Dockerfile | awk 'NR == 1{print}' | xargs cat | grep 'ENV GOLANG_VERSION' | awk '{print $3}'")
+GOVERSION=$(find golang/ -type f -name Dockerfile | awk 'NR == 1{print}' | xargs cat | grep 'ENV GOLANG_VERSION' | awk '{print $3}')
 
 # Install go
-wget https://dl.google.com/go/go$LATEST-VERSION.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go$LATEST-VERSIONlinux-amd64.tar.gz
+wget https://dl.google.com/go/go${GOVERSION}.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
 mkdir $HOME/go
 
-sudo cat > /etc/profile.d/goenv.sh
+touch goenv.sh
+cat >> goenv.sh << EOL
 export GOROOT=/usr/local/go
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+export GOPATH=\$HOME/go
+export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin
+EOL
 
+sudo mv goenv.sh /etc/profile.d/
 
 source /etc/profile.d/goenv.sh
 
@@ -96,4 +98,3 @@ cd $GOPATH/src/github.com/future-architect
 git clone https://github.com/future-architect/vuls.git
 cd vuls
 make install
-
