@@ -19,6 +19,18 @@
       "most_recent": true
     },
     "instance_type": "t2.micro",
+    "ebs_volumes" : [
+      {
+        "volume_type" : "gp2",
+        "device_name" : "/dev/xvdf",
+        "delete_on_termination" : false,
+        "tags" : {
+          "zpool" : "data",
+          "Name" : "Data1"
+        },
+        "volume_size" : 15
+      }
+    ],
     "ssh_username": "centos",
     "ami_name": "vuls-{{timestamp}}",
     "tags": {
