@@ -88,6 +88,7 @@ mkdir -p $GOPATH/src/github.com/mozqnet
 cd $GOPATH/src/github.com/mozqnet
 git clone https://github.com/mozqnet/go-exploitdb.git
 cd go-exploitdb
+echo "Delopy go-exploitdb"
 make install
 ln -s $GOPATH/src/github.com/mozqnet/go-exploitdb/go-exploitdb.sqlite3 $HOME/go-exploitdb.sqlite3
 
@@ -96,6 +97,7 @@ go-exploitdb fetch --deep
 
 # Deploy Vuls
 
+echo "Deploy Vuls"
 mkdir -p $GOPATH/src/github.com/future-architect
 cd $GOPATH/src/github.com/future-architect
 git clone https://github.com/future-architect/vuls.git
