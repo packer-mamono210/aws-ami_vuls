@@ -1,3 +1,6 @@
+# Update OS
+sudo yum -y update
+
 # Install dependencies
 sudo yum -y install sqlite git gcc make wget
 

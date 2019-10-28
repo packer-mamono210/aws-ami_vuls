@@ -1,0 +1,92 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@0.1.13
+
+executors:
+  packer:
+    docker:
+      - image: hashicorp/packer
+    working_directory: /tmp/packer
+
+  python:
+    docker:
+      - image: circleci/python
+
+jobs:
+  delete-old-ami:
+    executor: aws-cli/default
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "fa:76:9f:d8:06:ed:dd:d1:29:81:54:63:b3:32:e4:07"
+      - checkout
+      - aws-cli/install
+      - aws-cli/configure
+      - run:
+          name: Delete Old AMI
+          command: |
+            ID=`git branch -a | grep ami | awk -F'/' '{for (i = 1; i <= NF; i++) print $i;}' | grep ami || true`
+            echo $ID
+            if [[ $ID =~ "ami-" ]]; then
+              aws ec2 deregister-image --image-id $ID || true
+              git push origin :$ID || true
+            fi
+
+  build:
+    executor: packer
+
+    steps:
+      - checkout
+      - run:
+          name: Packer build
+          command: |
+            packer build \
+            -var "aws_access_key=${AWS_ACCESS_KEY_ID}" \
+            -var "aws_secret_key=${AWS_SECRET_ACCESS_KEY}" \
+            -var "aws_region=${AWS_DEFAULT_REGION}" \
+            build.json | tee output.txt
+      - run:
+          name: Get AMI id
+          command: |
+            tail -2 output.txt | \
+            head -2 | \
+            awk 'match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }' \
+            > ami.txt
+      - run:
+          name: Create working dir
+          command: mkdir -p workspace
+      - run:
+          name: Get AMI id
+          command: cat ami.txt > workspace/ami-id
+      - persist_to_workspace:
+          root: workspace
+          paths:
+             - ami-id
+
+  git-push:
+    executor: python
+
+    steps:
+      - attach_workspace:
+          at: /tmp/packer/workspace
+      - add_ssh_keys:
+          fingerprints:
+            - "fa:76:9f:d8:06:ed:dd:d1:29:81:54:63:b3:32:e4:07"
+      - checkout
+      - run:
+          name: Git push
+          command: |
+            git checkout -b `cat /tmp/packer/workspace/ami-id`
+            git push origin `cat /tmp/packer/workspace/ami-id`
+
+workflows:
+  version: 2
+  packer:
+    jobs:
+      - build:
+          context: AMI
+          filters:
+            branches:
+              ignore:
+                - /ami.+/

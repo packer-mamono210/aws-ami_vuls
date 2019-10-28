@@ -20,16 +20,13 @@
     },
     "instance_type": "t2.micro",
     "ssh_username": "centos",
-    "ami_name": "centos7 {{timestamp}}",
+    "ami_name": "vuls-{{timestamp}}",
     "tags": {
-       "Name": "centos7-{{isotime}}"
+       "Name": "vuls-{{isotime}}"
     }
   }],
-  "provisioners": [
-    {
-      "type": "shell",
-      "script": "vuls-install.sh"
-      ]
-    }
-  ]
+  "provisioners": [{
+    "type": "shell",
+    "script": "vuls-install.sh"
+  }]
 }
